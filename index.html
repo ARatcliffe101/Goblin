@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GOBLIN — Graphical Output Builder for Language Integration & Narration</title>
+  <link rel="icon" type="image/svg+xml" href="goblin-logo.svg" />
+  <style>
+    :root { --border:#d0d0d0; --bg:#f6f6f6; --btn:#ffffff; --blue:#1f5eff; }
+    body { font-family: Arial, sans-serif; margin: 0; height: 100vh; display: grid; grid-template-columns: 580px 1fr 1fr; }
+    .panel { border-right: 1px solid var(--border); padding: 14px; box-sizing: border-box; overflow: auto; }
+    .panel:last-child { border-right: none; }
+    h1 { font-size: 16px; margin: 0 0 10px; }
+    h2 { font-size: 13px; margin: 16px 0 8px; }
+    label { display:block; font-size: 12px; margin: 10px 0 4px; }
+    select, input, textarea, button, a.btnlink {
+      font-family: inherit; font-size: 13px; padding: 8px; box-sizing: border-box;
+      border: 1px solid var(--border); border-radius: 6px; background: var(--btn); color: inherit;
+      text-decoration: none; display: inline-flex; align-items: center; justify-content: center;
+    }
+    select, input, textarea { width: 100%; }
+    textarea { min-height: 70px; resize: vertical; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .actions { display:flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    button { cursor:pointer; }
+    button.primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+    button.danger { background: #fff; border-color: #c33; color:#c33; }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+    .hint { font-size: 12px; color:#444; line-height: 1.35; }
+    .muted { color:#666; }
+    .pill { display:inline-block; padding: 2px 8px; border:1px solid var(--border); border-radius: 999px; background:#fff; font-size: 12px; color:#333; }
+    .chip { display:inline-block; padding: 2px 8px; border:1px solid var(--border); border-radius: 999px; background:#fafafa; font-size: 12px; color:#333; }
+
+    #editor {
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 12px; min-height: calc(100vh - 60px);
+      overflow: auto; white-space: pre-wrap; outline: none;
+    }
+    .tag { border: 1px dashed #999; border-radius: 6px; padding: 0 4px; background: #fffdf2; }
+    .emptyTag {
+      border: 1px dashed #999; border-radius: 6px; padding: 0 4px;
+      background: #eef7ff; color:#123; user-select: none;
+    }
+
+    pre {
+      margin: 0;
+      border: 1px solid var(--border); border-radius: 8px;
+      background: var(--bg);
+      padding: 12px;
+      min-height: calc(100vh - 60px);
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+    .topbar { display:flex; align-items:center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+
+    .brand { display:flex; align-items:center; gap: 10px; }
+    .brand img { width: 36px; height: 36px; display:block; }
+    .brandTitle { display:flex; align-items:baseline; gap: 8px; flex-wrap: wrap; }
+    .brandTitle .name { font-size: 16px; font-weight: 800; letter-spacing: 0.3px; }
+    .brandTitle .exp { font-size: 12px; color:#555; font-weight: 500; }
+
+    .topbar .right { display:flex; gap: 8px; flex-wrap: wrap; }
+    .small { font-size: 12px; }
+    .warn { color:#7a4; }
+    .error { color:#b11; }
+    .ok { color:#167; }
+    .divider { height:1px; background: var(--border); margin: 14px 0; }
+    .two { display:grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .three { display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .box { border:1px solid var(--border); border-radius: 8px; padding: 10px; background: #fff; }
+    .list { display:flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+    .item { border:1px solid var(--border); border-radius: 10px; padding: 8px; background:#fff; }
+    .itemTop { display:flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .itemTitle { font-size: 13px; font-weight: 700; }
+    .itemMeta { font-size: 12px; color:#555; margin-top: 4px; }
+    .itemBtns { display:flex; gap: 6px; flex-wrap: wrap; }
+    .btnMini { padding: 6px 8px; font-size: 12px; }
+  </style>
+</head>
+<body>
+
+  <div class="panel">
+    <div class="topbar">
+      <div class="brand">
+        <img src="goblin-logo.svg" alt="GOBLIN logo" />
+        <div>
+          <div class="brandTitle">
+            <div class="name">GOBLIN</div>
+            <div class="exp">Graphical Output Builder for Language Integration &amp; Narration</div>
+          </div>
+          <div class="small muted">Highlight text and apply SSML. Output stays portable.</div>
+        </div>
+      </div>
+      <div class="right">
+        <a class="btnlink" href="./HELP.html" target="_blank" title="Open help file">Help</a>
+        <button id="btnAbout" title="About GOBLIN">About</button>
+      </div>
+    </div>
+<h2>Document</h2>
+    <label for="langRoot">xml:lang (root)</label>
+    <input id="langRoot" value="en-GB" />
+<div class="divider"></div>
+
+    <h2>Undo / Redo</h2>
+    <div class="actions">
+      <button id="btnUndo">Undo</button>
+      <button id="btnRedo">Redo</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <h2>Pronunciation Manager</h2>
+    <div class="box">
+      <div class="three">
+        <div>
+          <label for="pmSearch">Search</label>
+          <input id="pmSearch" placeholder="Search term, notes, tags..." />
+        </div>
+        <div>
+          <label for="pmFilter">Method filter</label>
+          <select id="pmFilter">
+            <option value="">All</option>
+            <option value="phoneme">phoneme</option>
+            <option value="sub">sub</option>
+            <option value="say-as">say-as</option>
+          </select>
+        </div>
+        <div>
+          <label for="pmCase">Match</label>
+          <select id="pmCase">
+            <option value="insensitive">Case-insensitive</option>
+            <option value="sensitive">Case-sensitive</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="two">
+        <div>
+          <label for="pmTerm">Term (written)</label>
+          <input id="pmTerm" placeholder="e.g., HAZOP, EEMUA, data" />
+        </div>
+        <div>
+          <label for="pmMethod">Method</label>
+          <select id="pmMethod">
+            <option value="phoneme">phoneme</option>
+            <option value="sub">sub</option>
+            <option value="say-as">say-as</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="pmFields"></div>
+
+      <div class="two">
+        <div>
+          <label for="pmTags">Category/Tags (comma-separated)</label>
+          <input id="pmTags" placeholder="e.g., acronyms, safety, chemical" />
+        </div>
+        <div>
+          <label for="pmNotes">Notes</label>
+          <input id="pmNotes" placeholder="e.g., Use in UK narration" />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="pmAdd" class="primary">Add / Update</button>
+        <button id="pmClear">Clear</button>
+        <button id="pmExport">Export (JSON)</button>
+        <button id="pmImport">Import (JSON)</button>
+      </div>
+
+      <div class="hint muted" style="margin-top:6px;">
+        Apply actions are on each saved item below. “Apply to all occurrences” is best-effort—review output.
+      </div>
+
+      <div id="pmList" class="list"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <h2>Presets</h2>
+    <label for="preset">Preset</label>
+    <select id="preset"></select>
+    <div class="actions">
+      <button id="btnLoadPreset">Load preset</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <h2>Saved Snippets (generic reuse)</h2>
+    <label for="snippet">Saved snippet</label>
+    <select id="snippet"></select>
+    <div class="actions">
+      <button id="btnApplySnippet">Apply snippet (wrap)</button>
+      <button id="btnDeleteSnippet" class="danger">Delete snippet</button>
+    </div>
+    <div class="actions">
+      <button id="btnExportSnippets">Export snippets (JSON)</button>
+      <button id="btnImportSnippets">Import snippets (JSON)</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <h2>Feature</h2>
+    <label for="feature">SSML feature</label>
+    <select id="feature"></select>
+
+    <div id="fields"></div>
+
+    <div class="actions">
+      <button class="primary" id="btnWrap">Wrap selection</button>
+      <button id="btnInsert">Insert at cursor</button>
+      <button class="danger" id="btnClear">Clear</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <h2>Tag Inspector</h2>
+    <div class="hint muted" id="inspectorHint">Click a highlighted SSML region in the editor to inspect it.</div>
+    <div id="inspector" style="display:none;">
+      <div class="two">
+        <div>
+          <label>Element</label>
+          <input id="inspName" readonly />
+        </div>
+        <div>
+          <label>Kind</label>
+          <input id="inspKind" readonly />
+        </div>
+      </div>
+
+      <label>Attributes (JSON)</label>
+      <textarea id="inspAttrs" placeholder='{"level":"strong"}'></textarea>
+
+      <div class="actions">
+        <button id="btnInspApply">Apply attributes</button>
+        <button id="btnInspUnwrap">Unwrap</button>
+        <button id="btnInspRemove" class="danger">Remove</button>
+      </div>
+      <div class="actions">
+        <button id="btnInspSaveSnippet">Save as snippet</button>
+        <button id="btnInspToPron" title="Send phoneme/sub/say-as to Pronunciation Manager">Send to Pronunciation Manager</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="topbar">
+      <div>
+        <strong>Authoring</strong>
+        <span class="small muted"> (paste text, highlight, apply tags)</span>
+      </div>
+      <div class="right">
+        <button id="btnPasteDemo">Paste demo</button>
+      </div>
+    </div>
+    <div id="editor" contenteditable="true">Paste your text here.</div>
+  </div>
+
+  <div class="panel">
+    <div class="topbar">
+      <div>
+        <strong>SSML Output</strong>
+        <span class="small muted"> (copy/paste)</span>
+      </div>
+      <div class="right">
+        <button id="btnCopy">Copy SSML</button>
+      </div>
+    </div>
+    <pre id="ssmlOut"></pre>
+    <div id="status" class="small muted" style="margin-top:8px;"></div>
+  </div>
+
+<script>
+const STORAGE_SNIPPETS_KEY = "ssmlEditorSavedSnippets_v1";
+const STORAGE_PRON_KEY = "ssmlEditorPronunciations_v1";
+
+const FEATURES_ALL = [
+  { id:"emphasis", label:"Emphasis <emphasis>", mode:"wrap",
+    fields:[{ id:"level", label:"level", type:"select", options:["strong","moderate","reduced","none"] }], risk:"low"
+  },
+  { id:"prosody", label:"Prosody <prosody>", mode:"wrap", risk:"low",
+    fields:[
+      { id:"rate", label:"rate", type:"selectOrCustom", options:["", "x-slow","slow","medium","fast","x-fast", "+10%","-10%"] },
+      { id:"pitch", label:"pitch", type:"selectOrCustom", options:["", "x-low","low","medium","high","x-high", "+10%","-10%","+2st","-2st"] },
+      { id:"volume", label:"volume", type:"selectOrCustom", options:["", "silent","x-soft","soft","medium","loud","x-loud","+3dB","-6dB"] },
+      { id:"range", label:"range", type:"selectOrCustom", options:["", "x-low","low","medium","high","x-high", "+10%","-10%","+2st","-2st"] }
+    ]
+  },
+  { id:"break", label:"Pause <break/>", mode:"empty", risk:"low",
+    fields:[
+      { id:"time", label:"time (e.g. 500ms, 1s)", type:"text", placeholder:"500ms" },
+      { id:"strength", label:"strength", type:"select", options:["", "none","x-weak","weak","medium","strong","x-strong"] }
+    ]
+  },
+  { id:"sub", label:"Substitution <sub>", mode:"wrap", risk:"low",
+    fields:[{ id:"alias", label:"alias (spoken form)", type:"text", placeholder:"What should be spoken?" }]
+  },
+  { id:"say-as", label:"Interpretation <say-as>", mode:"wrap", risk:"high",
+    fields:[
+      { id:"interpret-as", label:"interpret-as", type:"select", options:[
+        "characters","digits","number","ordinal","cardinal",
+        "date","time","telephone","address","fraction","unit"
+      ]},
+      { id:"format", label:"format (optional)", type:"text", placeholder:"e.g. dmy, mdy, ymd" },
+      { id:"detail", label:"detail (optional)", type:"text", placeholder:"engine-dependent" }
+    ]
+  },
+  { id:"phoneme", label:"Pronunciation <phoneme>", mode:"wrap", risk:"high",
+    fields:[
+      { id:"alphabet", label:"alphabet", type:"select", options:["ipa","x-sampa"] },
+      { id:"ph", label:"ph (phonetic string)", type:"text", placeholder:"e.g. ˈdeɪtə" }
+    ]
+  },
+  { id:"voice", label:"Voice <voice>", mode:"wrap", risk:"high",
+    fields:[
+      { id:"name", label:"name (optional)", type:"text", placeholder:"voice name" },
+      { id:"gender", label:"gender (optional)", type:"select", options:["", "male","female","neutral"] },
+      { id:"age", label:"age (optional)", type:"text", placeholder:"e.g. 30" },
+      { id:"variant", label:"variant (optional)", type:"text", placeholder:"engine-dependent" },
+      { id:"languages", label:"languages (optional)", type:"text", placeholder:"e.g. en-GB en-US" }
+    ]
+  },
+  { id:"lang", label:"Language <lang>", mode:"wrap", risk:"high",
+    fields:[{ id:"xml:lang", label:"xml:lang", type:"text", placeholder:"e.g. en-GB, fr-FR" }]
+  },
+  { id:"p", label:"Paragraph <p>", mode:"wrap", risk:"medium", fields:[] },
+  { id:"s", label:"Sentence <s>", mode:"wrap", risk:"medium", fields:[] },
+  { id:"mark", label:"Marker <mark/>", mode:"empty", risk:"high",
+    fields:[{ id:"name", label:"name", type:"text", placeholder:"marker-id" }]
+  },
+  { id:"audio", label:"Audio <audio>", mode:"wrapOrInsert", risk:"high",
+    fields:[
+      { id:"src", label:"src", type:"text", placeholder:"audio URL or path" },
+      { id:"clipBegin", label:"clipBegin (optional)", type:"text", placeholder:"e.g. 0s" },
+      { id:"clipEnd", label:"clipEnd (optional)", type:"text", placeholder:"e.g. 2.5s" },
+      { id:"repeatCount", label:"repeatCount (optional)", type:"text", placeholder:"e.g. 1" },
+      { id:"repeatDur", label:"repeatDur (optional)", type:"text", placeholder:"e.g. 3s" },
+      { id:"soundLevel", label:"soundLevel (optional)", type:"text", placeholder:"e.g. -3dB" }
+    ]
+  },
+  { id:"lexicon", label:"Lexicon <lexicon/>", mode:"empty", risk:"high",
+    fields:[
+      { id:"uri", label:"uri", type:"text", placeholder:"lexicon URL" },
+      { id:"type", label:"type (optional)", type:"text", placeholder:"e.g. application/pls+xml" },
+      { id:"xml:lang", label:"xml:lang (optional)", type:"text", placeholder:"e.g. en-GB" }
+    ]
+  },
+  { id:"metadata", label:"Metadata <metadata>", mode:"wrap", risk:"high",
+    fields:[{ id:"note", label:"metadata text (simple)", type:"textarea", placeholder:"Note: true metadata often uses other namespaces." }]
+  },
+  { id:"token", label:"Token <token>", mode:"wrap", risk:"high", fields:[] }
+];
+
+
+const PRESETS = [
+  { id:"preset_emph_strong", label:"Emphasis: strong (wrap)", feature:"emphasis", mode:"wrap", values:{ "level":"strong" } },
+  { id:"preset_emph_reduced", label:"Emphasis: reduced (wrap)", feature:"emphasis", mode:"wrap", values:{ "level":"reduced" } },
+  { id:"preset_pause_250", label:"Pause: 250ms (insert)", feature:"break", mode:"insert", values:{ "time":"250ms", "strength":"" } },
+  { id:"preset_pause_500", label:"Pause: 500ms (insert)", feature:"break", mode:"insert", values:{ "time":"500ms", "strength":"" } },
+  { id:"preset_pause_strong", label:"Pause: strong (insert)", feature:"break", mode:"insert", values:{ "time":"", "strength":"strong" } },
+  { id:"preset_prosody_slow", label:"Prosody: slow rate (wrap)", feature:"prosody", mode:"wrap", values:{ "rate":"slow", "pitch":"", "volume":"", "range":"" } },
+  { id:"preset_prosody_fast", label:"Prosody: fast rate (wrap)", feature:"prosody", mode:"wrap", values:{ "rate":"fast", "pitch":"", "volume":"", "range":"" } },
+  { id:"preset_sub_expand", label:"Substitution: acronym expansion (wrap)", feature:"sub", mode:"wrap", values:{ "alias":"(enter spoken form)" } },
+  { id:"preset_sayas_date_dmy", label:"Say-as: date (format dmy) (wrap)", feature:"say-as", mode:"wrap", values:{ "interpret-as":"date", "format":"dmy", "detail":"" } },
+  { id:"preset_sayas_chars", label:"Say-as: characters (wrap)", feature:"say-as", mode:"wrap", values:{ "interpret-as":"characters", "format":"", "detail":"" } },
+  { id:"preset_phoneme_ipa", label:"Phoneme: IPA (wrap)", feature:"phoneme", mode:"wrap", values:{ "alphabet":"ipa", "ph":"(enter IPA)" } }
+];
+
+function byId(id){ return document.getElementById(id); }
+const editor = byId("editor");
+
+function escapeXml(s) {
+  return (s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&apos;");
+}
+function attrsToString(attrs) {
+  const parts = [];
+  for (const k in (attrs || {})) {
+    const v = attrs[k];
+    if (v === undefined || v === null || v === "") continue;
+    parts.push(`${k}="${escapeXml(String(v))}"`);
+  }
+  return parts.length ? " " + parts.join(" ") : "";
+}
+function status(msg, cls) {
+  const el = byId("status");
+  el.className = "small " + (cls || "muted");
+  el.textContent = msg;
+}
+
+/* Profiles removed: always full SSML 1.1 */
+let ACTIVE_FEATURES = FEATURES_ALL.slice();
+
+function renderProfile() {
+  // Backwards-compatible entry point: always show full SSML feature set.
+  ACTIVE_FEATURES = FEATURES_ALL.slice();
+  renderFeatureOptions();
+  renderPresetOptions();
+  renderFields(byId("feature").value);
+  updateSSML();
+}
+
+function renderFeatureOptions() {
+  const sel = byId("feature");
+  sel.innerHTML = "";
+  ACTIVE_FEATURES = FEATURES_ALL.slice();
+  ACTIVE_FEATURES.forEach(f => {
+    const opt = document.createElement("option");
+    opt.value = f.id;
+    opt.textContent = f.label;
+    sel.appendChild(opt);
+  });
+  if (!sel.value || !ACTIVE_FEATURES.some(f => f.id === sel.value)) sel.value = ACTIVE_FEATURES[0]?.id || "";
+}
+
+function renderPresetOptions() {
+  const sel = byId("preset");
+  sel.innerHTML = "";
+  PRESETS.forEach(p => {
+    const opt = document.createElement("option");
+    opt.value = p.id;
+    opt.textContent = p.label;
+    sel.appendChild(opt);
+  });
+  if (sel.options.length) sel.value = sel.options[0].value;
+}
+
+function featureHint(f) {
+  switch (f.id) {
+    case "say-as": return `<span class="warn">Engine-dependent:</span> interpret-as/format/detail support varies.`;
+    case "phoneme": return `<span class="warn">Engine-dependent:</span> IPA/X-SAMPA support varies.`;
+    default: return `Select text, then apply this SSML element.`;
+  }
+}
+function fieldEl(field, prefix="f_") {
+  const wrap = document.createElement("div");
+  const label = document.createElement("label");
+  label.textContent = field.label;
+  label.setAttribute("for", prefix + field.id);
+  wrap.appendChild(label);
+
+  let input;
+  if (field.type === "select") {
+    input = document.createElement("select");
+    input.id = prefix + field.id;
+    field.options.forEach(v => {
+      const o = document.createElement("option");
+      o.value = v;
+      o.textContent = v === "" ? "(not set)" : v;
+      input.appendChild(o);
+    });
+  } else if (field.type === "text") {
+    input = document.createElement("input");
+    input.id = prefix + field.id;
+    input.placeholder = field.placeholder || "";
+  } else {
+    input = document.createElement("input");
+    input.id = prefix + field.id;
+    input.placeholder = field.placeholder || "";
+  }
+
+  wrap.appendChild(input);
+  return wrap;
+}
+
+function renderFields(featureId) {
+  const container = byId("fields");
+  container.innerHTML = "";
+  const f = ACTIVE_FEATURES.find(x => x.id === featureId) || FEATURES_ALL.find(x => x.id === featureId);
+  if (!f) return;
+
+  const note = document.createElement("div");
+  note.className = "hint"; note.style.marginTop = "10px";
+  note.innerHTML = featureHint(f);
+  container.appendChild(note);
+
+  if (f.fields.length) f.fields.forEach(field => container.appendChild(fieldEl(field, "f_")));
+  else {
+    const empty = document.createElement("div");
+    empty.className = "hint muted"; empty.style.marginTop = "10px";
+    empty.textContent = "No parameters for this element.";
+    container.appendChild(empty);
+  }
+
+  const wrapBtn = byId("btnWrap");
+  const insBtn = byId("btnInsert");
+  if (f.mode === "wrap") { wrapBtn.disabled = false; insBtn.disabled = true; }
+  else if (f.mode === "empty") { wrapBtn.disabled = true; insBtn.disabled = false; }
+  else { wrapBtn.disabled = false; insBtn.disabled = false; }
+}
+
+function readAttrs(feature, prefix="f_") {
+  const attrs = {};
+  for (const field of feature.fields) {
+    const val = (byId(prefix + field.id)?.value || "").trim();
+    if (val !== "") attrs[field.id] = val;
+  }
+  return attrs;
+}
+
+function getSelectionRangeWithinEditor() {
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) return null;
+  const range = sel.getRangeAt(0);
+  if (!editor.contains(range.commonAncestorContainer)) return null;
+  return range;
+}
+
+function wrapSelectionWithSSML(name, attrs) {
+  const range = getSelectionRangeWithinEditor();
+  if (!range) return status("Select text inside the editor first.", "error");
+  const text = range.toString();
+  if (!text) return status("Select some text to wrap.", "error");
+
+  const span = document.createElement("span");
+  span.className = "tag";
+  span.dataset.ssmlKind = "wrap";
+  span.dataset.ssmlName = name;
+  span.dataset.ssmlAttrs = JSON.stringify(attrs || {});
+
+  const frag = range.extractContents();
+  span.appendChild(frag);
+  range.insertNode(span);
+
+  range.setStartAfter(span); range.setEndAfter(span);
+  const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+
+  updateSSML(); pushState();
+}
+
+function insertWrappedAtCursor(name, attrs, text) {
+  const range = getSelectionRangeWithinEditor();
+  if (!range) return status("Click inside the editor to set the cursor position.", "error");
+
+  const span = document.createElement("span");
+  span.className = "tag";
+  span.dataset.ssmlKind = "wrap";
+  span.dataset.ssmlName = name;
+  span.dataset.ssmlAttrs = JSON.stringify(attrs || {});
+  span.textContent = text;
+
+  range.insertNode(span);
+  range.setStartAfter(span); range.setEndAfter(span);
+  const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+
+  updateSSML(); pushState();
+}
+
+function insertEmptySSML(name, attrs, labelText) {
+  const range = getSelectionRangeWithinEditor();
+  if (!range) return status("Click inside the editor to set the cursor position.", "error");
+
+  const span = document.createElement("span");
+  span.className = "emptyTag";
+  span.contentEditable = "false";
+  span.dataset.ssmlKind = "empty";
+  span.dataset.ssmlName = name;
+  span.dataset.ssmlAttrs = JSON.stringify(attrs || {});
+  span.textContent = labelText || `[${name}]`;
+
+  range.insertNode(span);
+
+  range.setStartAfter(span); range.setEndAfter(span);
+  const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+
+  updateSSML(); pushState();
+}
+
+function domToSSML(node) {
+  if (node.nodeType === Node.TEXT_NODE) return escapeXml(node.nodeValue || "");
+  if (node.nodeType === Node.ELEMENT_NODE) {
+    const el = node;
+    const tagName = el.tagName.toLowerCase();
+
+    if (tagName === "br") return "\n";
+    if (tagName === "div" || tagName === "p") {
+      let out = "";
+      el.childNodes.forEach(ch => out += domToSSML(ch));
+      return out + "\n";
+    }
+
+    const kind = el.dataset ? el.dataset.ssmlKind : null;
+    const name = el.dataset ? el.dataset.ssmlName : null;
+    const attrs = el.dataset && el.dataset.ssmlAttrs ? JSON.parse(el.dataset.ssmlAttrs) : {};
+
+    if (kind === "empty" && name) return `<${name}${attrsToString(attrs)}/>`;
+
+    if (kind === "wrap" && name) {
+      let inner = "";
+      el.childNodes.forEach(ch => inner += domToSSML(ch));
+      return `<${name}${attrsToString(attrs)}>${inner}</${name}>`;
+    }
+
+    let out = "";
+    el.childNodes.forEach(ch => out += domToSSML(ch));
+    return out;
+  }
+  return "";
+}
+
+function buildSSML() {
+  const rootLang = (byId("langRoot").value || "en-GB").trim() || "en-GB";
+  let body = "";
+  editor.childNodes.forEach(ch => body += domToSSML(ch));
+  body = body.replace(/\n{3,}/g, "\n\n").trimEnd();
+  return `<speak version="1.1"\n       xmlns="http://www.w3.org/2001/10/synthesis"\n       xml:lang="${escapeXml(rootLang)}">\n${body}\n</speak>`;
+}
+
+function checkWellFormedXml(xmlStr) {
+  try {
+    const p = new DOMParser();
+    const doc = p.parseFromString(xmlStr, "application/xml");
+    const err = doc.getElementsByTagName("parsererror")[0];
+    if (err) return { ok:false, msg: "SSML is not well-formed XML. Check special characters and nesting." };
+    return { ok:true, msg: "SSML is well-formed XML." };
+  } catch {
+    return { ok:false, msg: "SSML parse check failed." };
+  }
+}
+
+function updateSSML() {
+  const ssml = buildSSML();
+  byId("ssmlOut").textContent = ssml;
+  const chk = checkWellFormedXml(ssml);
+  status(chk.msg, chk.ok ? "ok" : "error");
+}
+
+/* Feature actions (minimal for v5 core) */
+function applyWrap() {
+  const featureId = byId("feature").value;
+  const feature = FEATURES_ALL.find(f => f.id === featureId);
+  if (!feature) return;
+  const attrs = readAttrs(feature, "f_");
+  const elName = (feature.id === "say-as") ? "say-as" : feature.id;
+  wrapSelectionWithSSML(elName, attrs);
+}
+
+function applyInsert() {
+  const featureId = byId("feature").value;
+  const feature = FEATURES_ALL.find(f => f.id === featureId);
+  if (!feature) return;
+  if (feature.id === "break") {
+    const attrs = readAttrs(feature, "f_");
+    const time = attrs.time || "";
+    const strength = attrs.strength || "";
+    const label = strength ? `[break ${strength}]` : (time ? `[break ${time}]` : "[break]");
+    const a = {};
+    if (time) a.time = time;
+    if (strength) a.strength = strength;
+    return insertEmptySSML("break", a, label);
+  }
+  status("Insert is available for break/empty tags in this compact build.", "muted");
+}
+
+function pasteDemo() {
+  editor.innerText = `HAZOP is used in process safety.\nPlease call 0207 123 4567 on 25/12/2025.\nData should be pronounced correctly.`;
+  updateSSML(); pushState();
+}
+async function copySSML() {
+  const ssml = byId("ssmlOut").textContent;
+  try { await navigator.clipboard.writeText(ssml); status("Copied SSML to clipboard.", "ok"); }
+  catch { status("Copy failed (browser permissions). Select and copy manually.", "error"); }
+}
+
+/* Presets */
+function loadPreset() {
+  const presetId = byId("preset").value;
+  const p = PRESETS.find(x => x.id === presetId);
+  if (!p) return;
+  byId("feature").value = p.feature;
+  renderFields(p.feature);
+  const feature = FEATURES_ALL.find(f => f.id === p.feature);
+  if (!feature) return;
+  for (const field of feature.fields) {
+    const el = byId("f_" + field.id);
+    if (el) el.value = (p.values && (p.values[field.id] ?? "")) ?? "";
+  }
+  status("Preset loaded.", "muted");
+}
+
+/* Undo/Redo */
+let undoStack = [];
+let redoStack = [];
+let isRestoring = false;
+let inputTimer = null;
+function snapshot(){ return editor.innerHTML; }
+function pushState() {
+  if (isRestoring) return;
+  const html = snapshot();
+  if (undoStack.length === 0 || undoStack[undoStack.length - 1] !== html) {
+    undoStack.push(html);
+    if (undoStack.length > 160) undoStack.shift();
+  }
+  redoStack = [];
+  byId("btnUndo").disabled = undoStack.length <= 1;
+  byId("btnRedo").disabled = redoStack.length === 0;
+}
+function restoreState(html) {
+  isRestoring = true;
+  editor.innerHTML = html;
+  isRestoring = false;
+  updateSSML();
+  byId("btnUndo").disabled = undoStack.length <= 1;
+  byId("btnRedo").disabled = redoStack.length === 0;
+}
+function undo() {
+  if (undoStack.length <= 1) return;
+  const current = undoStack.pop();
+  redoStack.push(current);
+  restoreState(undoStack[undoStack.length - 1]);
+}
+function redo() {
+  if (redoStack.length === 0) return;
+  const next = redoStack.pop();
+  undoStack.push(next);
+  restoreState(next);
+}
+
+/* Tag inspector (minimal + send-to-pron) */
+let selectedTag = null;
+function closestSsmlTag(el) {
+  let cur = el;
+  while (cur && cur !== editor) {
+    if (cur.dataset && cur.dataset.ssmlKind && cur.dataset.ssmlName) return cur;
+    cur = cur.parentNode;
+  }
+  return null;
+}
+function showInspectorFor(tagEl) {
+  selectedTag = tagEl;
+  byId("inspectorHint").style.display = "none";
+  byId("inspector").style.display = "block";
+  byId("inspName").value = tagEl.dataset.ssmlName || "";
+  byId("inspKind").value = tagEl.dataset.ssmlKind || "";
+  const attrs = tagEl.dataset.ssmlAttrs ? JSON.parse(tagEl.dataset.ssmlAttrs) : {};
+  byId("inspAttrs").value = JSON.stringify(attrs, null, 2);
+  byId("btnInspToPron").disabled = !(tagEl.dataset.ssmlKind === "wrap" && ["phoneme","sub","say-as"].includes((tagEl.dataset.ssmlName||"").toLowerCase()));
+}
+function applyInspectorAttrs() {
+  if (!selectedTag) return;
+  try {
+    const obj = JSON.parse(byId("inspAttrs").value || "{}");
+    selectedTag.dataset.ssmlAttrs = JSON.stringify(obj);
+    updateSSML(); pushState();
+    status("Inspector: attributes applied.", "ok");
+  } catch {
+    status("Inspector: invalid JSON in attributes.", "error");
+  }
+}
+function unwrapSelectedTag() {
+  if (!selectedTag) return;
+  if (selectedTag.dataset.ssmlKind !== "wrap") return;
+  const parent = selectedTag.parentNode;
+  while (selectedTag.firstChild) parent.insertBefore(selectedTag.firstChild, selectedTag);
+  parent.removeChild(selectedTag);
+  byId("inspectorHint").style.display = "block";
+  byId("inspector").style.display = "none";
+  updateSSML(); pushState();
+}
+function removeSelectedTag() { unwrapSelectedTag(); }
+
+/* Snippets */
+function loadSnippets() { try { return JSON.parse(localStorage.getItem(STORAGE_SNIPPETS_KEY) || "[]"); } catch { return []; } }
+function saveSnippets(arr) { localStorage.setItem(STORAGE_SNIPPETS_KEY, JSON.stringify(arr)); }
+function renderSnippetsDropdown() {
+  const sel = byId("snippet");
+  sel.innerHTML = "";
+  const arr = loadSnippets();
+  if (!arr.length) {
+    const opt = document.createElement("option"); opt.value=""; opt.textContent="(no saved snippets)"; sel.appendChild(opt);
+    byId("btnApplySnippet").disabled = true; byId("btnDeleteSnippet").disabled = true; return;
+  }
+  arr.forEach((s,i) => { const opt = document.createElement("option"); opt.value=String(i); opt.textContent=`${s.label} — <${s.element}>`; sel.appendChild(opt); });
+  sel.value="0";
+  byId("btnApplySnippet").disabled = false; byId("btnDeleteSnippet").disabled = false;
+}
+function saveSelectedTagAsSnippet() {
+  if (!selectedTag || selectedTag.dataset.ssmlKind !== "wrap") return status("Inspector: select a wrap tag first.", "error");
+  const element = selectedTag.dataset.ssmlName;
+  const attrs = selectedTag.dataset.ssmlAttrs ? JSON.parse(selectedTag.dataset.ssmlAttrs) : {};
+  const label = prompt("Snippet name:"); if (!label) return;
+  const arr = loadSnippets(); arr.push({ label: label.trim(), element, attrs }); saveSnippets(arr); renderSnippetsDropdown(); status("Snippet saved.", "ok");
+}
+function applySnippet() {
+  const i = byId("snippet").value; if (i==="") return;
+  const snip = loadSnippets()[parseInt(i,10)]; if (!snip) return;
+  wrapSelectionWithSSML(snip.element, snip.attrs || {});
+}
+function deleteSnippet() {
+  const i = byId("snippet").value; if (i==="") return;
+  const arr = loadSnippets(); const snip = arr[parseInt(i,10)]; if (!snip) return;
+  if (!confirm(`Delete snippet: ${snip.label}?`)) return;
+  arr.splice(parseInt(i,10),1); saveSnippets(arr); renderSnippetsDropdown(); status("Snippet deleted.", "muted");
+}
+function downloadJson(filename, obj) {
+  const data = JSON.stringify(obj, null, 2);
+  const blob = new Blob([data], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 500);
+}
+
+function exportSnippets() {
+  const stamp = new Date().toISOString().slice(0,10);
+  downloadJson(`goblin-snippets-${stamp}.json`, loadSnippets());
+}
+
+function importSnippets() {
+  const inp = document.getElementById("snipImportFile");
+  if (!inp) return status("Import failed: file selector not available.", "error");
+  inp.value = "";
+  inp.click();
+}
+
+/* Pronunciation Manager */
+let pmEditingId = null;
+function loadPron(){ try { return JSON.parse(localStorage.getItem(STORAGE_PRON_KEY) || "[]"); } catch { return []; } }
+function savePron(arr){ localStorage.setItem(STORAGE_PRON_KEY, JSON.stringify(arr)); }
+function newId(){ return "p_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16); }
+
+function pmMethodFieldsDef(method) {
+  if (method === "phoneme") return [
+    { id:"alphabet", label:"alphabet", type:"select", options:["ipa","x-sampa"] },
+    { id:"ph", label:"ph (phonetic string)", type:"text", placeholder:"e.g. ˈdeɪtə" }
+  ];
+  if (method === "sub") return [
+    { id:"alias", label:"alias (spoken form)", type:"text", placeholder:"What should be spoken?" }
+  ];
+  return [
+    { id:"interpret-as", label:"interpret-as", type:"select", options:[
+      "characters","digits","number","ordinal","cardinal",
+      "date","time","telephone","address","fraction","unit"
+    ]},
+    { id:"format", label:"format (optional)", type:"text", placeholder:"e.g. dmy" },
+    { id:"detail", label:"detail (optional)", type:"text", placeholder:"engine-dependent" }
+  ];
+}
+function renderPmFields() {
+  const method = byId("pmMethod").value;
+  const container = byId("pmFields");
+  container.innerHTML = "";
+  const defs = pmMethodFieldsDef(method);
+  const grid = document.createElement("div");
+  grid.className = defs.length >= 2 ? "two" : "one";
+  defs.forEach(d => grid.appendChild(fieldEl(d, "pm_")));
+  container.appendChild(grid);
+}
+function pmReadAttrs() {
+  const method = byId("pmMethod").value;
+  const defs = pmMethodFieldsDef(method);
+  const attrs = {};
+  defs.forEach(d => {
+    const val = (byId("pm_" + d.id)?.value || "").trim();
+    if (val !== "") attrs[d.id] = val;
+  });
+  return attrs;
+}
+function pmValidate(e) {
+  if (!e.term) return "Term is required.";
+  if (e.method === "phoneme" && (!e.attrs.ph || !e.attrs.alphabet)) return "Phoneme requires alphabet and ph.";
+  if (e.method === "sub" && !e.attrs.alias) return "Sub requires alias.";
+  if (e.method === "say-as" && !e.attrs["interpret-as"]) return "Say-as requires interpret-as.";
+  return null;
+}
+function pmAddOrUpdate() {
+  const term = byId("pmTerm").value.trim();
+  const method = byId("pmMethod").value;
+  const tags = (byId("pmTags").value || "").split(",").map(x=>x.trim()).filter(Boolean);
+  const notes = (byId("pmNotes").value || "").trim();
+  const attrs = pmReadAttrs();
+  const entry = { id: pmEditingId || newId(), term, method, attrs, tags, notes, updatedAt: Date.now() };
+  const err = pmValidate(entry);
+  if (err) return status("Pronunciation: " + err, "error");
+  const arr = loadPron();
+  const idx = arr.findIndex(x=>x.id===entry.id);
+  if (idx>=0) arr[idx]=entry; else arr.push(entry);
+  arr.sort((a,b)=>(a.term||"").localeCompare(b.term||"", undefined, { sensitivity:"base" }));
+  savePron(arr);
+  renderPmList();
+  status(idx>=0 ? "Pronunciation updated." : "Pronunciation added.", "ok");
+  pmEditingId = entry.id;
+}
+function pmClearForm() {
+  pmEditingId = null;
+  byId("pmTerm").value = "";
+  byId("pmMethod").value = "phoneme";
+  byId("pmTags").value = "";
+  byId("pmNotes").value = "";
+  renderPmFields();
+  status("Pronunciation form cleared.", "muted");
+}
+function pmPopulateForm(e) {
+  pmEditingId = e.id;
+  byId("pmTerm").value = e.term || "";
+  byId("pmMethod").value = e.method || "phoneme";
+  byId("pmTags").value = (e.tags||[]).join(", ");
+  byId("pmNotes").value = e.notes || "";
+  renderPmFields();
+  Object.keys(e.attrs||{}).forEach(k => {
+    const el = byId("pm_" + k);
+    if (el) el.value = String(e.attrs[k]);
+  });
+  status("Loaded pronunciation for editing.", "muted");
+}
+function pmExport() {
+  const stamp = new Date().toISOString().slice(0,10);
+  downloadJson(`goblin-pronunciations-${stamp}.json`, loadPron());
+}
+function pmImport() {
+  const inp = document.getElementById("pmImportFile");
+  if (!inp) return status("Import failed: file selector not available.", "error");
+  inp.value = "";
+  inp.click();
+}
+function pmToElementAndAttrs(e) {
+  if (e.method==="phoneme") return { element:"phoneme", attrs:e.attrs||{} };
+  if (e.method==="sub") return { element:"sub", attrs:e.attrs||{} };
+  return { element:"say-as", attrs:e.attrs||{} };
+}
+function shouldSkipTextNode(node) {
+  const p = node.parentNode;
+  if (!p) return false;
+  if (p.dataset && p.dataset.ssmlKind) return true;
+  if (p.closest) {
+    const tagged = p.closest("[data-ssml-kind]");
+    if (tagged) return true;
+  }
+  return false;
+}
+function pmApplyAllOccurrences(e) {
+  const term = e.term;
+  const matchCase = byId("pmCase").value === "sensitive";
+  const needle = matchCase ? term : term.toLowerCase();
+  const { element, attrs } = pmToElementAndAttrs(e);
+
+  const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT, {
+    acceptNode: (node) => {
+      if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+      if (shouldSkipTextNode(node)) return NodeFilter.FILTER_REJECT;
+      const hay = matchCase ? node.nodeValue : node.nodeValue.toLowerCase();
+      return hay.includes(needle) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+    }
+  });
+
+  let changed = 0;
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+
+  nodes.forEach(textNode => {
+    let text = textNode.nodeValue;
+    let hay = matchCase ? text : text.toLowerCase();
+    let idx = hay.indexOf(needle);
+    while (idx !== -1) {
+      const before = text.slice(0, idx);
+      const match = text.slice(idx, idx + term.length);
+      const after = text.slice(idx + term.length);
+
+      const beforeNode = before ? document.createTextNode(before) : null;
+      const afterNode = after ? document.createTextNode(after) : null;
+
+      const span = document.createElement("span");
+      span.className = "tag";
+      span.dataset.ssmlKind = "wrap";
+      span.dataset.ssmlName = element;
+      span.dataset.ssmlAttrs = JSON.stringify(attrs || {});
+      span.textContent = match;
+
+      const parent = textNode.parentNode;
+      if (!parent) break;
+
+      if (beforeNode) parent.insertBefore(beforeNode, textNode);
+      parent.insertBefore(span, textNode);
+      if (afterNode) parent.insertBefore(afterNode, textNode);
+      parent.removeChild(textNode);
+
+      changed += 1;
+
+      if (!afterNode) break;
+      textNode = afterNode;
+      text = afterNode.nodeValue;
+      hay = matchCase ? text : text.toLowerCase();
+      idx = hay.indexOf(needle);
+    }
+  });
+
+  if (changed) { updateSSML(); pushState(); status(`Applied "${term}" to ${changed} occurrence(s).`, "ok"); }
+  else status(`No occurrences of "${term}" found.`, "muted");
+}
+function pmApplyToSelection(e) {
+  const { element, attrs } = pmToElementAndAttrs(e);
+  wrapSelectionWithSSML(element, attrs);
+}
+function pmInsertAtCursor(e) {
+  const { element, attrs } = pmToElementAndAttrs(e);
+  insertWrappedAtCursor(element, attrs, e.term);
+}
+function pmDelete(e) {
+  if (!confirm(`Delete pronunciation for "${e.term}"?`)) return;
+  const arr = loadPron().filter(x=>x.id!==e.id);
+  savePron(arr);
+  renderPmList();
+  if (pmEditingId === e.id) pmClearForm();
+  status("Pronunciation deleted.", "muted");
+}
+function pmMatches(e, q, mf) {
+  if (mf && e.method !== mf) return false;
+  if (!q) return true;
+  const hay = [e.term||"", e.method||"", (e.tags||[]).join(" "), e.notes||"", JSON.stringify(e.attrs||{})].join(" ").toLowerCase();
+  return hay.includes(q.toLowerCase());
+}
+function renderPmList() {
+  const list = byId("pmList");
+  list.innerHTML = "";
+  const q = (byId("pmSearch").value || "").trim();
+  const mf = (byId("pmFilter").value || "").trim();
+  const arr = loadPron().filter(e=>pmMatches(e,q,mf));
+  if (!arr.length) {
+    const empty = document.createElement("div");
+    empty.className = "hint muted";
+    empty.textContent = "No pronunciations saved (or none match the current filters).";
+    list.appendChild(empty);
+    return;
+  }
+  arr.forEach(e => {
+    const item = document.createElement("div"); item.className = "item";
+    const top = document.createElement("div"); top.className = "itemTop";
+    const left = document.createElement("div");
+    const title = document.createElement("div"); title.className = "itemTitle"; title.textContent = e.term;
+    const chip = document.createElement("span"); chip.className="chip"; chip.textContent = e.method;
+    left.appendChild(title); left.appendChild(chip);
+
+    const btns = document.createElement("div"); btns.className="itemBtns";
+    const bApply = document.createElement("button"); bApply.className="btnMini"; bApply.textContent="Apply to selection"; bApply.onclick=()=>pmApplyToSelection(e);
+    const bInsert = document.createElement("button"); bInsert.className="btnMini"; bInsert.textContent="Insert at cursor"; bInsert.onclick=()=>pmInsertAtCursor(e);
+    const bAll = document.createElement("button"); bAll.className="btnMini"; bAll.textContent="Apply to all"; bAll.onclick=()=>pmApplyAllOccurrences(e);
+    const bEdit = document.createElement("button"); bEdit.className="btnMini"; bEdit.textContent="Edit"; bEdit.onclick=()=>pmPopulateForm(e);
+    const bDel = document.createElement("button"); bDel.className="btnMini danger"; bDel.textContent="Delete"; bDel.onclick=()=>pmDelete(e);
+    btns.appendChild(bApply); btns.appendChild(bInsert); btns.appendChild(bAll); btns.appendChild(bEdit); btns.appendChild(bDel);
+
+    top.appendChild(left); top.appendChild(btns);
+    const meta = document.createElement("div"); meta.className="itemMeta";
+    meta.textContent = `Tags: ${(e.tags||[]).join(", ") || "(none)"} • Notes: ${e.notes || "(none)"}`;
+    item.appendChild(top); item.appendChild(meta);
+    list.appendChild(item);
+  });
+}
+function inspectorToPronunciation() {
+  if (!selectedTag) return;
+  const nm = (selectedTag.dataset.ssmlName || "").toLowerCase();
+  if (!(selectedTag.dataset.ssmlKind === "wrap" && ["phoneme","sub","say-as"].includes(nm))) return;
+  const attrs = selectedTag.dataset.ssmlAttrs ? JSON.parse(selectedTag.dataset.ssmlAttrs) : {};
+  const term = (selectedTag.textContent || "").trim();
+  if (!term) return status("Inspector: tag text is empty.", "error");
+  byId("pmTerm").value = term;
+  byId("pmMethod").value = nm;
+  byId("pmTags").value = "";
+  byId("pmNotes").value = "";
+  pmEditingId = null;
+  renderPmFields();
+  Object.keys(attrs).forEach(k => {
+    const el = byId("pm_" + k);
+    if (el) el.value = String(attrs[k]);
+  });
+  status("Loaded inspector tag into Pronunciation Manager (review and click Add/Update).", "ok");
+}
+
+/* Init */
+editor.addEventListener("input", () => {
+  updateSSML();
+  if (isRestoring) return;
+  if (inputTimer) clearTimeout(inputTimer);
+  inputTimer = setTimeout(() => pushState(), 350);
+});
+editor.addEventListener("click", (e) => {
+  const tag = closestSsmlTag(e.target);
+  if (tag) showInspectorFor(tag);
+});
+
+function init() {
+  undoStack = [snapshot()];
+  byId("btnUndo").disabled = true;
+  byId("btnRedo").disabled = true;
+
+  renderProfile();
+  updateSSML();
+  renderSnippetsDropdown();
+  renderPmFields();
+  renderPmList();
+
+  byId("feature").addEventListener("change", (e) => renderFields(e.target.value));
+byId("btnWrap").addEventListener("click", applyWrap);
+  byId("btnInsert").addEventListener("click", applyInsert);
+  byId("btnPasteDemo").addEventListener("click", pasteDemo);
+  byId("btnCopy").addEventListener("click", copySSML);
+
+  byId("btnLoadPreset").addEventListener("click", loadPreset);
+  byId("btnUndo").addEventListener("click", undo);
+  byId("btnRedo").addEventListener("click", redo);
+
+  byId("btnInspApply").addEventListener("click", applyInspectorAttrs);
+  byId("btnInspUnwrap").addEventListener("click", unwrapSelectedTag);
+  byId("btnInspRemove").addEventListener("click", removeSelectedTag);
+  byId("btnInspSaveSnippet").addEventListener("click", saveSelectedTagAsSnippet);
+  byId("btnInspToPron").addEventListener("click", inspectorToPronunciation);
+
+  byId("btnApplySnippet").addEventListener("click", applySnippet);
+  byId("btnDeleteSnippet").addEventListener("click", deleteSnippet);
+  byId("btnExportSnippets").addEventListener("click", exportSnippets);
+  byId("btnImportSnippets").addEventListener("click", importSnippets);
+
+  byId("pmMethod").addEventListener("change", renderPmFields);
+  byId("pmAdd").addEventListener("click", pmAddOrUpdate);
+  byId("pmClear").addEventListener("click", pmClearForm);
+  byId("pmExport").addEventListener("click", pmExport);
+  byId("pmImport").addEventListener("click", pmImport);
+  byId("pmSearch").addEventListener("input", renderPmList);
+  byId("pmFilter").addEventListener("change", renderPmList);
+
+  // JSON import handlers (open-file dialog)
+  const pmImportFile = document.getElementById("pmImportFile");
+  if (pmImportFile) {
+    pmImportFile.addEventListener("change", async () => {
+      const file = pmImportFile.files && pmImportFile.files[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const arr = JSON.parse(text);
+        if (!Array.isArray(arr)) throw new Error("Not an array");
+        const cleaned = arr
+          .filter(x=>x && typeof x==="object")
+          .map(x=>({
+            id: String(x.id || newId()),
+            term: String(x.term||"").trim(),
+            method: String(x.method||"").trim(),
+            attrs: (x.attrs && typeof x.attrs==="object") ? x.attrs : {},
+            tags: Array.isArray(x.tags)? x.tags.map(y=>String(y).trim()).filter(Boolean) : [],
+            notes: String(x.notes||"").trim(),
+            updatedAt: Number(x.updatedAt || Date.now())
+          }))
+          .filter(x=>x.term && ["phoneme","sub","say-as"].includes(x.method))
+          .filter(x=>!pmValidate(x));
+        cleaned.sort((a,b)=>(a.term||"").localeCompare(b.term||"", undefined, { sensitivity:"base" }));
+        savePron(cleaned);
+        renderPmList();
+        status("Pronunciations imported.", "ok");
+      } catch (e) {
+        status("Import failed: invalid JSON file.", "error");
+      }
+    });
+  }
+
+  const snipImportFile = document.getElementById("snipImportFile");
+  if (snipImportFile) {
+    snipImportFile.addEventListener("change", async () => {
+      const file = snipImportFile.files && snipImportFile.files[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const arr = JSON.parse(text);
+        if (!Array.isArray(arr)) throw new Error("Not an array");
+        saveSnippets(arr);
+        renderSnippetsDropdown();
+        status("Snippets imported.", "ok");
+      } catch (e) {
+        status("Import failed: invalid JSON file.", "error");
+      }
+    });
+  }
+
+}
+
+document.addEventListener("DOMContentLoaded", init);
+
+// About modal (wired on DOMContentLoaded so elements exist even if the modal HTML is later in the document)
+document.addEventListener("DOMContentLoaded", () => {
+  const aboutOverlay = document.getElementById("aboutOverlay");
+  const btnAbout = document.getElementById("btnAbout");
+  const btnAboutClose = document.getElementById("btnAboutClose");
+
+  function openAbout() {
+    if (!aboutOverlay) return;
+    aboutOverlay.style.display = "flex";
+  }
+  function closeAbout() {
+    if (!aboutOverlay) return;
+    aboutOverlay.style.display = "none";
+  }
+
+  if (btnAbout) btnAbout.addEventListener("click", openAbout);
+  if (btnAboutClose) btnAboutClose.addEventListener("click", closeAbout);
+
+  if (aboutOverlay) {
+    aboutOverlay.addEventListener("click", (e) => {
+      if (e.target === aboutOverlay) closeAbout();
+    });
+  }
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeAbout();
+  });
+});
+
+</script>
+
+  <!-- About modal -->
+  <div id="aboutOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:9999; align-items:center; justify-content:center; padding:18px;">
+    <div id="aboutDialog" style="max-width:720px; width:100%; background:#fff; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,0.25); border:1px solid #d0d0d0; padding:16px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <img src="./goblin-logo.svg" alt="GOBLIN logo" style="width:44px; height:44px;" />
+          <div>
+            <div style="font-weight:800; font-size:16px; line-height:1.2;">GOBLIN</div>
+            <div style="font-size:12px; color:#555;">Graphical Output Builder for Language Integration &amp; Narration</div>
+          </div>
+        </div>
+        <button id="btnAboutClose" style="padding:8px 10px; border-radius:10px; border:1px solid #d0d0d0; background:#fff; cursor:pointer;">Close</button>
+      </div>
+
+      <div style="margin-top:12px; font-size:13px; line-height:1.5; color:#222;">
+        <p style="margin:0 0 10px;">
+          A portable SSML authoring tool for creating reusable speech markup, pronunciations, and narration-friendly text output.
+        </p>
+
+        <div style="border-top:1px solid #e5e5e5; margin:12px 0;"></div>
+
+        <p style="margin:0 0 6px;"><strong>Developed by:</strong> ASR 2005</p>
+        <p style="margin:0 0 6px;"><strong>License:</strong> GNU General Public License v3.0 (GPLv3)</p>
+        <p style="margin:0;">
+          A copy of the license is included in this package as <code>LICENSE.txt</code>. You can also view it at
+          <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener">gnu.org</a>.
+        </p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Hidden file inputs for JSON import -->
+  <input id="pmImportFile" type="file" accept="application/json,.json" style="display:none" />
+  <input id="snipImportFile" type="file" accept="application/json,.json" style="display:none" />
+
+</body>
+</html>

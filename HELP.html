@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GOBLIN Help (v5)</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; line-height: 1.45; }
+    h1,h2,h3 { margin-top: 20px; }
+    code, pre { background: #f6f6f6; padding: 2px 4px; border-radius: 4px; }
+    pre { padding: 12px; overflow: auto; }
+    table { border-collapse: collapse; width: 100%; margin: 10px 0 18px; }
+    th, td { border: 1px solid #ddd; padding: 8px; vertical-align: top; }
+    th { background: #fafafa; text-align: left; }
+    .muted { color: #666; }
+  </style>
+</head>
+<body>
+  <h1>GOBLIN Help (v5)</h1>
+  <p class="muted"><strong>GOBLIN</strong> — Graphical Output Builder for Language Integration &amp; Narration</p>
+  <p><img src="goblin-logo.svg" alt="GOBLIN logo" style="width:120px;height:auto;border:1px solid #ddd;border-radius:14px;padding:10px;background:#fff;" /></p>
+  <p class="muted">This tool helps you author SSML by highlighting text and applying controlled SSML elements. The SSML output is always visible and portable.</p>
+
+  <h2>Pronunciation Manager</h2>
+  <p>The <strong>Pronunciation Manager</strong> is a structured, reusable library for common e-learning pronunciations and interpretations. Each entry includes:</p>
+  <ul>
+    <li><strong>Term</strong> (the written text)</li>
+    <li><strong>Method</strong> (<code>phoneme</code>, <code>sub</code>, or <code>say-as</code>)</li>
+    <li><strong>Parameters</strong> (e.g., IPA string, alias text, interpret-as)</li>
+    <li><strong>Category/Tags</strong> (optional)</li>
+    <li><strong>Notes</strong> (optional)</li>
+  </ul>
+  <p>Actions:</p>
+  <ul>
+    <li><strong>Apply to selection</strong>: wraps currently highlighted text with the chosen method.</li>
+    <li><strong>Insert at cursor</strong>: inserts the term already wrapped with its SSML.</li>
+    <li><strong>Apply to all occurrences</strong>: best-effort helper that wraps all exact text matches found in the editor’s text nodes.</li>
+    <li><strong>Import/Export</strong>: move your pronunciation library between machines using JSON.</li>
+  </ul>
+  <p class="muted">Because “apply to all” is textual matching, review the results to ensure no unintended matches were wrapped.</p>
+
+  <h2>Tag Inspector</h2>
+  <p>Click any highlighted SSML region (or inserted marker) in the editor to open the <strong>Tag Inspector</strong>. In v5, phoneme/sub/say-as tags can be sent directly to the Pronunciation Manager.</p>
+
+  <h2>Undo / Redo</h2>
+  <p>Use <strong>Undo</strong> and <strong>Redo</strong> to step through editor history.</p>
+
+  <h2>Portability notes</h2>
+  <ul>
+    <li>The output is standards-based SSML 1.1, with a single <code>&lt;speak&gt;</code> root.</li>
+    <li>Engines differ in which tags/attributes they support; always validate in the target platform.</li>
+  </ul>
+
+  <h2>References</h2>
+  <ul>
+    <li>W3C Recommendation: <em>Speech Synthesis Markup Language (SSML) Version 1.1</em> (7 September 2010). 
+      <a href="https://www.w3.org/TR/2010/REC-speech-synthesis11-20100907/" target="_blank" rel="noopener">https://www.w3.org/TR/2010/REC-speech-synthesis11-20100907/</a>
+    </li>
+    <li>W3C Recommendation: <em>Pronunciation Lexicon Specification (PLS) Version 1.0</em>. 
+      <a href="https://www.w3.org/TR/pronunciation-lexicon/" target="_blank" rel="noopener">https://www.w3.org/TR/pronunciation-lexicon/</a>
+    </li>
+    <li>W3C Recommendation: <em>Extensible Markup Language (XML) 1.0</em>. 
+      <a href="https://www.w3.org/TR/xml/" target="_blank" rel="noopener">https://www.w3.org/TR/xml/</a>
+    </li>
+  </ul>
+
+
+  <h2>About</h2>
+  <p>Use the <strong>About</strong> button in the app header to view licensing and developer information.</p>
+
+
+  <h2>Licensing</h2>
+  <p>This program is licensed under the <strong>GNU General Public License v3.0 (GPLv3)</strong>. See <code>LICENSE.txt</code> included with this package.</p>
+
+
+  <h2>Import / Export</h2>
+  <p>Use the Import buttons to select a JSON file from your computer. Export downloads a JSON file you can store or share.</p>
+
+</body>
+</html>

@@ -1,0 +1,8 @@
+GOBLIN — Graphical Output Builder for Language Integration & Narration
+Developed by ASR 2005
+
+Licensed under the GNU General Public License, Version 3 (GPLv3).
+
+You may copy and distribute verbatim copies of the GNU GPL v3 license text.
+If you did not receive a copy of the license text with this package, you can obtain it here:
+https://www.gnu.org/licenses/gpl-3.0.html
